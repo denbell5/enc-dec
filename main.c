@@ -5,7 +5,7 @@
 #include <openssl/err.h>
 #include <enc.h>
 
-char *read_file(char *filename)
+char *read_file(char *filename, int *text_len)
 {
   char *buffer = NULL;
   int string_size, read_size;
@@ -18,6 +18,7 @@ char *read_file(char *filename)
 
   fseek(handler, 0, SEEK_END);
   string_size = ftell(handler);
+  *text_len = string_size;
   rewind(handler);
 
   buffer = (char *)malloc(sizeof(char) * (string_size + 1));
@@ -55,8 +56,9 @@ int main(int argc, char *argv[])
   printf("Key - %s\n", key);
   printf("IV - %s\n\n", iv);
 
-  unsigned char *plaintext = read_file(filename);
-  printf("Plaintext is:\n%s\n", plaintext);
+  int plaintext_len;
+  unsigned char *plaintext = read_file(filename, &plaintext_len);
+  printf("Plaintext %d is:\n%s\n", plaintext_len, plaintext);
 
   unsigned char ciphertext[128];
   unsigned char decryptedtext[128];
@@ -69,9 +71,10 @@ int main(int argc, char *argv[])
   printf("\n");
 
   write_file("../encrypted", ciphertext);
-  unsigned char *ciphertext2 = read_file("../encrypted");
+  int ciphertext_len2;
+  unsigned char *ciphertext2 = read_file("../encrypted", &ciphertext_len2);
 
-  decryptedtext_len = decrypt(ciphertext2, 20, key, iv, decryptedtext);
+  decryptedtext_len = decrypt(ciphertext2, ciphertext_len2, key, iv, decryptedtext);
   decryptedtext[decryptedtext_len] = '\0';
 
   printf("Decrypted text is:\n");
