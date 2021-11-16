@@ -5,33 +5,73 @@
 #include <openssl/err.h>
 #include <enc.h>
 
+char *read_file(char *filename)
+{
+  char *buffer = NULL;
+  int string_size, read_size;
+  FILE *handler = fopen(filename, "r");
+
+  if (!handler)
+  {
+    return buffer;
+  }
+
+  fseek(handler, 0, SEEK_END);
+  string_size = ftell(handler);
+  rewind(handler);
+
+  buffer = (char *)malloc(sizeof(char) * (string_size + 1));
+  read_size = fread(buffer, sizeof(char), string_size, handler);
+  buffer[string_size] = '\0';
+
+  fclose(handler);
+  return buffer;
+}
+
+void *write_file(char *filename, unsigned char *content)
+{
+  FILE *handler = fopen(filename, "w");
+  fprintf(handler, "%s", content);
+  fclose(handler);
+}
+
 int main(int argc, char *argv[])
 {
-  printf("Arg count - %d\n", argc);
+  printf("Arg count - %d\n\n", argc);
   unsigned char *action = "enc";
   unsigned char *key = (unsigned char *)"01234567890123456789012345678901";
   unsigned char *iv = (unsigned char *)"0123456789012345";
+  unsigned char *filename;
 
   if (argc >= 4)
   {
     action = (unsigned char *)argv[1];
-    key = (unsigned char *)argv[2];
-    iv = (unsigned char *)argv[3];
+    filename = (unsigned char *)argv[2];
+    key = (unsigned char *)argv[3];
+    iv = (unsigned char *)argv[4];
   }
   printf("Action - %s\n", action);
+  printf("Filename - %s\n", argv[2]);
   printf("Key - %s\n", key);
-  printf("IV - %s\n", iv);
+  printf("IV - %s\n\n", iv);
 
-  unsigned char *plaintext = (unsigned char *)"The quick brown fox jumps over the lazy dog";
+  unsigned char *plaintext = read_file(filename);
+  printf("Plaintext is:\n%s\n", plaintext);
+
   unsigned char ciphertext[128];
   unsigned char decryptedtext[128];
   int decryptedtext_len, ciphertext_len;
 
   ciphertext_len = encrypt(plaintext, strlen((char *)plaintext), key, iv, ciphertext);
 
+  printf("Encrypted bytes:\n");
   BIO_dump_fp(stdout, (const char *)ciphertext, ciphertext_len);
+  printf("\n");
 
-  decryptedtext_len = decrypt(ciphertext, ciphertext_len, key, iv, decryptedtext);
+  write_file("../encrypted", ciphertext);
+  unsigned char *ciphertext2 = read_file("../encrypted");
+
+  decryptedtext_len = decrypt(ciphertext2, 20, key, iv, decryptedtext);
   decryptedtext[decryptedtext_len] = '\0';
 
   printf("Decrypted text is:\n");
