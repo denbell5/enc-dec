@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     BIO_dump_fp(stdout, (const char *)enctext, enctext_len);
     printf("\n");
 
-    write_file("../encrypted", enctext);
+    write_file("../encrypted", enctext, enctext_len);
   }
   else
   {
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     printf("Decrypted text is:\n");
     printf("%s\n", decryptedtext);
 
-    write_file("../decrypted", decryptedtext);
+    write_file("../decrypted", decryptedtext, decryptedtext_len);
   }
 
   return 0;

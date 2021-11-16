@@ -5,7 +5,7 @@ char *read_file(char *filename, int *text_len)
 {
   char *buffer = NULL;
   int string_size, read_size;
-  FILE *handler = fopen(filename, "r");
+  FILE *handler = fopen(filename, "rb");
 
   if (!handler)
   {
@@ -25,9 +25,9 @@ char *read_file(char *filename, int *text_len)
   return buffer;
 }
 
-void *write_file(char *filename, unsigned char *content)
+void *write_file(char *filename, unsigned char *content, int content_len)
 {
-  FILE *handler = fopen(filename, "w");
-  fprintf(handler, "%s", content);
+  FILE *handler = fopen(filename, "wb");
+  fwrite(content, content_len, 1, handler);
   fclose(handler);
 }
