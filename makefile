@@ -1,6 +1,6 @@
-make: main.c enc.c
+make: main.c enc.c io.c
 	gcc -o build/main \
-	main.c enc.c -I. \
+	main.c enc.c io.c -I. \
 	-L/usr/local/lib/ -L/usr/include \
 	-lssl -lcrypto -lm
 
