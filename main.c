@@ -26,29 +26,37 @@ int main(int argc, char *argv[])
   printf("Key - %s\n", key);
   printf("IV - %s\n\n", iv);
 
-  int plaintext_len;
-  unsigned char *plaintext = read_file(filename, &plaintext_len);
-  printf("Plaintext %d is:\n%s\n", plaintext_len, plaintext);
+  if (strcmp("enc", action) == 0)
+  {
+    int plaintext_len;
+    unsigned char *plaintext = read_file(filename, &plaintext_len);
+    printf("Plaintext %d is:\n%s\n", plaintext_len, plaintext);
 
-  unsigned char ciphertext[128];
-  unsigned char decryptedtext[128];
-  int decryptedtext_len, ciphertext_len;
+    unsigned char enctext[plaintext_len * 2];
+    int enctext_len;
+    enctext_len = encrypt(plaintext, strlen((char *)plaintext), key, iv, enctext);
 
-  ciphertext_len = encrypt(plaintext, strlen((char *)plaintext), key, iv, ciphertext);
+    printf("Encrypted bytes:\n");
+    BIO_dump_fp(stdout, (const char *)enctext, enctext_len);
+    printf("\n");
 
-  printf("Encrypted bytes:\n");
-  BIO_dump_fp(stdout, (const char *)ciphertext, ciphertext_len);
-  printf("\n");
+    write_file("../encrypted", enctext);
+  }
+  else
+  {
+    int ciphertext_len;
+    unsigned char *ciphertext = read_file("../encrypted", &ciphertext_len);
 
-  write_file("../encrypted", ciphertext);
-  int ciphertext_len2;
-  unsigned char *ciphertext2 = read_file("../encrypted", &ciphertext_len2);
+    int decryptedtext_len;
+    unsigned char decryptedtext[ciphertext_len * 2];
+    decryptedtext_len = decrypt(ciphertext, ciphertext_len, key, iv, decryptedtext);
+    decryptedtext[decryptedtext_len] = '\0';
+    
+    printf("Decrypted text is:\n");
+    printf("%s\n", decryptedtext);
 
-  decryptedtext_len = decrypt(ciphertext2, ciphertext_len2, key, iv, decryptedtext);
-  decryptedtext[decryptedtext_len] = '\0';
-
-  printf("Decrypted text is:\n");
-  printf("%s\n", decryptedtext);
+    write_file("../decrypted", decryptedtext);
+  }
 
   return 0;
 }
